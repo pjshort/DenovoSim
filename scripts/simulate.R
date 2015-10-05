@@ -28,13 +28,15 @@ source("../R/mutation_null_model.R")
 option_list <- list(
   make_option("--n_snps", default=453,
               help="Pass the genomic regions that should be annotated with predicted TF binding sites."),
-  make_option("--n_probands", default=425,
+  make_option("--n_probands", default=421,
               help="Number of probands which should be simulated (this can be used to simulate diagnosed/undiagnosed effects)."),
   make_option("--iterations", default=10, help="Set the number of simulation outputs to generate."),
-  make_option("--n_chunks", default=2, help = "Number of smaller files to split simulated data into (for parallel processing)"),
-  make_option("--base_name", default="../data/simulated_dn", help = "Directory to save the chunks (if needed)."),
+  make_option("--n_chunks", default=2, help = "Number of smaller files to split simulated data into (to reduce memory overhead 
+  and allow parallel processing)"),
+  make_option("--base_name", default="../data/simulated_dn", help = "Directory to save the chunks. Passing /path/to/chunk 
+  will yield /path/to/chunk.1.txt, path/to/chunk.2.txt, etc."),
   make_option("--regions", default="../data/DDD_well_cov_regions.txt",
-              help="Set location to save the output of JASPAR-annotated de novos."),
+              help="Pass set of genomic regions for simulation."),
   make_option("--verbose", action="store_true", default=FALSE,
               help="Print extra output advising the user of progression through the code.")
 )
