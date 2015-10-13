@@ -77,7 +77,7 @@ record_snp <- function(mutated_position, proband_id){
   
   if (nchar(ref_tri) < 3) { # simulation de novo fell on end of sequence
     print("LESS THAN 3")
-    ref_tri = get_sequence(chr = paste0("chr", chr), start = start + rel_pos - 1, stop = end + rel_pos + 1)
+    ref_tri = get_sequence(chr = paste0("chr", chr), start = pos - 1, stop = pos + 1)
   }
   
   ref = as.character(sapply(ref_tri, function(s) substr(s,2,2)))
