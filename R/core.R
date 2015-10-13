@@ -1,6 +1,6 @@
 # core routines for TF binding analysis
 
-get_sequence <- function(chr, start, stop, version = "hg19") {
+get_sequence <- function(chr, start, stop, version = "hg18") {
   
   # input: (multiple) chr, start, stop, hg version (defaults to hg19)
   # output: list of sequences as DNAStrings object for each input

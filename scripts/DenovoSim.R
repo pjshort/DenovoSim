@@ -26,7 +26,7 @@ source("../R/mutation_null_model.R")
 
 ### command line options
 option_list <- list(
-  make_option("--n_snps", default=453,
+  make_option("--n_snps", default=0,
               help="Pass the genomic regions that should be annotated with predicted TF binding sites."),
   make_option("--n_probands", default=421,
               help="Number of probands which should be simulated (this can be used to simulate diagnosed/undiagnosed effects)."),
@@ -51,20 +51,35 @@ regions$seq = as.character(get_sequence(regions$chr, regions$start, regions$stop
 if ( args$verbose ) { write("Computing per-base mutation probability for all of the genomic regions that were passed. This may take a little while...", stderr()) }
 
 # get probability of mutation per region and probability of selecting each region (prop of total probability)
-regions$p_snp_null <- sapply(regions$seq, p_sequence)
-regions$p_relative <- regions$p_snp_null/sum(regions$p_snp_null)
+if (args$n_snps != 0) {
+  # only needed for supervised simulation
+  regions$p_snp_null <- sapply(regions$seq, p_sequence)
+  regions$p_relative <- regions$p_snp_null/sum(regions$p_snp_null)
+}
 
-# TODO: write way to pre-process this step...
-#seq_probabilities = relative_seq_probabilities(regions) # run these two lines to regenerate
-#save(seq_probabilities, file = "../data/sequence_probabilities.out")
-attach("../data/sequence_probabilities.out")
+if ( args$verbose ) { write("Simulating de novos drawn from sequence-context-specific null distribution over regions provided...", stderr()) }
 
-if ( args$verbose ) { write("Simulating de novos drawn from null distribution over regions...", stderr()) }
-
-# create large data frame with columns
-sim_out = lapply(seq(1, args$iterations), function(i) simulate_de_novos(regions, seq_probabilities, args$n_snps, args$n_probands, i))
-sim_df = do.call(rbind, sim_out)
-sim_df = sim_df[,c("person_stable_id", "chr", "pos", "ref", "alt", "iteration")]
+# create large data frame with columns for id, chr, pos, ref, alt, iteration
+if (args$n_snps != 0){
+  # supervised - condition on number of probands and number of SNPs
+  
+  seq_probabilities_normalized = relative_haploid_seq_probabilities(regions) # run these two lines to regenerate
+  #save(seq_probabilities, file = "../data/sequence_probabilities.out")
+  #attach("../data/sequence_probabilities.out")
+  
+  sim_out = lapply(seq(1, args$iterations), function(i) simulate_de_novos(regions, seq_probabilities, args$n_snps, args$n_probands, i))
+  sim_df = do.call(rbind, sim_out)
+  sim_df = sim_df[,c("person_stable_id", "chr", "pos", "ref", "alt", "iteration")]
+} else { 
+  # do not condition on the number of SNPs
+  
+  seq_probabilities_absolute = absolute_haploid_seq_probabilities(regions) # run these two lines to regenerate
+  #save(seq_probabilities, file = "../data/sequence_probabilities.out")
+  #attach("../data/sequence_probabilities.out")
+  
+  sim_out = lapply(seq(1, args$iterations), function(i) unsupervised_sim(regions, seq_probabilities, args$n_probands, i))
+  sim_df = do.call(rbind, sim_out)
+}
 
 bkp = seq(0, args$iterations, length.out = args$n_chunks + 1)
 

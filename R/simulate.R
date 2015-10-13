@@ -1,11 +1,20 @@
 # create de novo files by simulation
 
-relative_seq_probabilities <- function(regions){
+relative_haploid_seq_probabilities <- function(regions){
   
   # get probability of mutation at each point in sequence (based on sequence context) and normalize
   seq_probabilities = sapply(as.character(regions$seq), function(s) p_position(s, normalize = TRUE), USE.NAMES = FALSE)
   names(seq_probabilities) = regions$region_id
   return(seq_probabilities)
+}
+
+absolute_haploid_seq_probabilities <- function(regions){
+  
+  # get probability of mutation at each point in sequence (based on sequence context) - does not normalize
+  seq_probabilities = sapply(as.character(regions$seq), function(s) p_position(s, normalize = FALSE), USE.NAMES = FALSE)
+  names(seq_probabilities) = regions$region_id
+  return(seq_probabilities)
+  
 }
 
 simulate_de_novos <- function(regions, seq_probabilities, n_snps, n_probands, iteration) {
@@ -43,4 +52,57 @@ simulate_de_novos <- function(regions, seq_probabilities, n_snps, n_probands, it
   sim_dn = data.frame("person_stable_id" = proband_ids, "chr" = coords[,1], "pos" = pos, "ref" = ref, "alt" = alt, "iteration" = iteration)
   
   return(sim_dn)  # data frame
+}
+
+simulate_proband <- function(null_probs, n_bases){
+  # generate a vector of random numbers (one random number per genomic position)
+  p_vector = runif(n_bases)
+  mutated_positions = which(p_vector < null_probs)
+  return(mutated_positions)
+}
+
+
+record_snp <- function(mutated_position, proband_id){
+  
+  # take a proband id and position and return one line of vcf
+  region_idx = sum(region_break_points < mutated_position) + 1
+  rel_pos = as.numeric(mutated_position - region_break_points[region_idx - 1])
+  coords = strsplit(names(seq_probabilities)[region_idx], "\\.")[[1]]
+  chr = coords[1]
+  start = as.numeric(coords[2])
+  end = as.numeric(coords[3])
+  pos = start + rel_pos
+  
+  ref_tri = substr(regions$seq[region_idx], rel_pos-1, rel_pos+1)
+  
+  if (nchar(ref_tri) < 3) { # simulation de novo fell on end of sequence
+    print("LESS THAN 3")
+    ref_tri = get_sequence(chr = paste0("chr", chr), start = start + rel_pos - 1, stop = end + rel_pos + 1)
+  }
+  
+  ref = as.character(sapply(ref_tri, function(s) substr(s,2,2)))
+  alt = as.character(sapply(ref_tri, sample_alt))
+  
+  sim_dn = data.frame("person_stable_id" = proband_id, "chr" = chr, "pos" = pos, "ref" = ref, "alt" = alt)
+  return(sim_dn)
+}
+
+unsupervised_sim <- function(regions, seq_probabilities, n_probands, iteration){
+  # generate null probability of mutation at each base (probability is haploid, so multiply by 2)
+  null_probs = as.numeric(unlist(seq_probabilities))*2 # note seq_probabilities should be generated with normalize = FALSE
+  n_bases = length(null_probs)
+  
+  region_break_points = cumsum(sapply(seq_probabilities, function(s) length(s)))
+
+  mutation_coords = replicate(n_probands, simulate_proband(null_probs, n_bases))
+  muts_per_proband = sapply(mutation_coords, function(m) length(m))
+  mutation_coords = unlist(mutation_coords)
+  
+  proband_ids = paste0("proband.", seq(n_probands), ".iteration.", iteration)
+  mutated_proband_ids = rep(proband_ids, muts_per_proband)
+  
+  sim_dn = do.call(rbind, mapply(record_snp, mutation_coords, mutated_proband_ids, SIMPLIFY = FALSE))
+  sim_dn$iteration = iteration
+  
+  return(sim_dn)
 }
