@@ -62,7 +62,7 @@ simulate_proband <- function(null_probs, n_bases){
 }
 
 
-record_snp <- function(mutated_position, proband_id){
+record_snp <- function(mutated_position, proband_id, regions, region_break_points, seq_probabilities){
   
   # take a proband id and position and return one line of vcf
   region_idx = sum(region_break_points < mutated_position) + 1
@@ -101,7 +101,9 @@ unsupervised_sim <- function(regions, seq_probabilities, n_probands, iteration){
   proband_ids = paste0("proband.", seq(n_probands), ".iteration.", iteration)
   mutated_proband_ids = rep(proband_ids, muts_per_proband)
   
-  sim_dn = do.call(rbind, mapply(record_snp, mutation_coords, mutated_proband_ids, SIMPLIFY = FALSE))
+  sim_dn = do.call(rbind, mapply(record_snp, mutation_coords, mutated_proband_ids, 
+                                 MoreArgs = list("regions" = regions, "region_break_points" = region_break_points, 
+                                                 "seq_probablities" = seq_probabilities), SIMPLIFY = FALSE))
   sim_dn$iteration = iteration
   
   return(sim_dn)

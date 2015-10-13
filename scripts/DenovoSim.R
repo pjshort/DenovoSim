@@ -43,10 +43,19 @@ option_list <- list(
 
 args <- parse_args(OptionParser(option_list=option_list))
 
+args$regions = "~/phd/code/CNE/data/regions_annotated.txt"
+
 # load in regions file with required columns: chr, start, stop
 regions <- read.table(args$regions, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 regions$region_id <- paste(regions$chr, regions$start, regions$stop, sep = ".")
 regions$seq = as.character(get_sequence(regions$chr, regions$start, regions$stop))
+
+args$n_probands = 30
+args$iterations = 3
+args$n_chunks = 1
+args$base_name = "/tmp/sim_test"
+args$verbose = TRUE
+args$n_snps = 0
 
 if ( args$verbose ) { write("Computing per-base mutation probability for all of the genomic regions that were passed. This may take a little while...", stderr()) }
 
@@ -67,17 +76,19 @@ if (args$n_snps != 0){
   #save(seq_probabilities, file = "../data/sequence_probabilities.out")
   #attach("../data/sequence_probabilities.out")
   
-  sim_out = lapply(seq(1, args$iterations), function(i) simulate_de_novos(regions, seq_probabilities, args$n_snps, args$n_probands, i))
+  sim_out = lapply(seq(1, args$iterations), function(i) simulate_de_novos(regions, seq_probabilities_normalized, args$n_snps, args$n_probands, i))
   sim_df = do.call(rbind, sim_out)
   sim_df = sim_df[,c("person_stable_id", "chr", "pos", "ref", "alt", "iteration")]
 } else { 
+  if ( args$verbose ) { write("Simulating de novos without conditioning on the number of SNPs.", stderr()) }
+  
   # do not condition on the number of SNPs
   
   seq_probabilities_absolute = absolute_haploid_seq_probabilities(regions) # run these two lines to regenerate
   #save(seq_probabilities, file = "../data/sequence_probabilities.out")
   #attach("../data/sequence_probabilities.out")
   
-  sim_out = lapply(seq(1, args$iterations), function(i) unsupervised_sim(regions, seq_probabilities, args$n_probands, i))
+  sim_out = lapply(seq(1, args$iterations), function(i) unsupervised_sim(regions, seq_probabilities_absolute, args$n_probands, i))
   sim_df = do.call(rbind, sim_out)
 }
 
