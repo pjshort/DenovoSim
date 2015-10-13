@@ -43,8 +43,6 @@ option_list <- list(
 
 args <- parse_args(OptionParser(option_list=option_list))
 
-args$regions = "~/phd/code/CNE/data/regions_annotated.txt"
-
 # load in regions file with required columns: chr, start, stop
 regions <- read.table(args$regions, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 regions$region_id <- paste(regions$chr, regions$start, regions$stop, sep = ".")
