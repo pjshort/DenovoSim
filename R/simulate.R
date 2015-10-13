@@ -103,7 +103,7 @@ unsupervised_sim <- function(regions, seq_probabilities, n_probands, iteration){
   
   sim_dn = do.call(rbind, mapply(record_snp, mutation_coords, mutated_proband_ids, 
                                  MoreArgs = list("regions" = regions, "region_break_points" = region_break_points, 
-                                                 "seq_probablities" = seq_probabilities), SIMPLIFY = FALSE))
+                                                 "seq_probabilities" = seq_probabilities), SIMPLIFY = FALSE))
   sim_dn$iteration = iteration
   
   return(sim_dn)
