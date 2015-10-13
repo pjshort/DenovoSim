@@ -48,13 +48,6 @@ regions <- read.table(args$regions, sep = "\t", header = TRUE, stringsAsFactors 
 regions$region_id <- paste(regions$chr, regions$start, regions$stop, sep = ".")
 regions$seq = as.character(get_sequence(regions$chr, regions$start, regions$stop))
 
-args$n_probands = 30
-args$iterations = 3
-args$n_chunks = 1
-args$base_name = "/tmp/sim_test"
-args$verbose = TRUE
-args$n_snps = 0
-
 if ( args$verbose ) { write("Computing per-base mutation probability for all of the genomic regions that were passed. This may take a little while...", stderr()) }
 
 # get probability of mutation per region and probability of selecting each region (prop of total probability)
