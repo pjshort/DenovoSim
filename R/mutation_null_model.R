@@ -43,7 +43,7 @@ sample_alt <- function(ref_tri) {
   
   # given a ref sequence and mutated position, sample a new alt based on null model (middle base changes)
   
-  m = mut_rates[match(ref_tri, mut_rates$from), c("to", "mu_snp")]
+  m = mut_rates[which(mut_rates$from == ref_tri), c("to", "mu_snp")]
   tri_alt = sample(m$to, size=1, prob=m$mu_snp)
   return(as.character(substr(tri_alt,2,2)))
 }

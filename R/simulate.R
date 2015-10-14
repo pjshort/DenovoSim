@@ -77,11 +77,11 @@ record_snp <- function(mutated_position, proband_id, regions, region_break_point
   
   if (nchar(ref_tri) < 3) { # simulation de novo fell on end of sequence
     print("LESS THAN 3")
-    ref_tri = get_sequence(chr = paste0("chr", chr), start = pos - 1, stop = pos + 1)
+    ref_tri = as.character(get_sequence(chr = paste0("chr", chr), start = pos - 1, stop = pos + 1)) # from S4 to character
   }
   
-  ref = as.character(sapply(ref_tri, function(s) substr(s,2,2)))
-  alt = as.character(sapply(ref_tri, sample_alt))
+  ref = substr(ref_tri,2,2)
+  alt = sample_alt(ref_tri)
   
   sim_dn = data.frame("person_stable_id" = proband_id, "chr" = chr, "pos" = pos, "ref" = ref, "alt" = alt)
   return(sim_dn)
@@ -101,8 +101,7 @@ unsupervised_sim <- function(regions, seq_probabilities, n_probands, iteration){
   proband_ids = paste0("proband.", seq(n_probands), ".iteration.", iteration)
   mutated_proband_ids = rep(proband_ids, muts_per_proband)
   
-  sim_dn = do.call(rbind, mapply(record_snp, mutation_coords, mutated_proband_ids, 
-                                 MoreArgs = list("regions" = regions, "region_break_points" = region_break_points, 
+  sim_dn = do.call(rbind, mapply(record_snp, mutation_coords, mutated_proband_ids, MoreArgs = list("regions" = regions, "region_break_points" = region_break_points, 
                                                  "seq_probabilities" = seq_probabilities), SIMPLIFY = FALSE))
   sim_dn$iteration = iteration
   
