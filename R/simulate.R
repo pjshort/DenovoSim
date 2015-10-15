@@ -66,7 +66,7 @@ record_snp <- function(mutated_position, proband_id, regions, region_break_point
   
   # take a proband id and position and return one line of vcf
   region_idx = sum(region_break_points < mutated_position) + 1
-  rel_pos = as.numeric(mutated_position - region_break_points[region_idx - 1])
+  rel_pos = as.numeric(mutated_position - region_break_points[region_idx])
   coords = strsplit(names(seq_probabilities)[region_idx], "\\.")[[1]]
   chr = coords[1]
   start = as.numeric(coords[2])
