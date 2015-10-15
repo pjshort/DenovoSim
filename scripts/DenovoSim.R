@@ -31,6 +31,7 @@ option_list <- list(
   make_option("--n_probands", default=421,
               help="Number of probands which should be simulated (this can be used to simulate diagnosed/undiagnosed effects)."),
   make_option("--iterations", default=10, help="Set the number of simulation outputs to generate."),
+  make_option("--iteration_start", default=1, help="Set where to start the iteration counting from - helpful if running in batches."),
   make_option("--n_chunks", default=2, help = "Number of smaller files to split simulated data into (to reduce memory overhead 
   and allow parallel processing)"),
   make_option("--base_name", default="../data/simulated_dn", help = "Directory to save the chunks. Passing /path/to/chunk 
@@ -83,7 +84,8 @@ if (args$n_snps != 0){
   sim_df = do.call(rbind, sim_out)
 }
 
-bkp = seq(0, args$iterations, length.out = args$n_chunks + 1)
+sim_df$iteration = sim_df$iteration + args$iteration_start - 1 # shift iterations up depending on where they are supposed to start
+bkp = seq(args$iteration_start - 1, args$iterations, length.out = args$n_chunks + 1)
 
 if ( args$verbose ) { write("Saving simulation files in chunks - feed these to denovoTF to annotate with TF binding predictions.", stderr()) }
 
