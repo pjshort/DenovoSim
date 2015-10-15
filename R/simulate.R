@@ -73,7 +73,15 @@ record_snp <- function(mutated_position, proband_id, regions, region_break_point
   end = as.numeric(coords[3])
   pos = start + rel_pos
   
-  ref_tri = substr(regions$seq[region_idx], rel_pos-1, rel_pos+1)
+  
+  result = tryCatch({
+    ref_tri = substr(regions$seq[region_idx], rel_pos-1, rel_pos+1)
+    }, error = function(err){
+      print(paste("MY ERROR: ", err))
+      print(paste0('region_idx = ', region_idx))
+      print(paste0('chr.start.stop = ', chr, ".", start, ".", end))
+      print(paste0('rel_pos = ', rel_pos))
+    }, finally = {})
   
   if (nchar(ref_tri) < 3) { # simulation de novo fell on end of sequence
     print("LESS THAN 3")
