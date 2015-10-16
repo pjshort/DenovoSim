@@ -65,7 +65,7 @@ simulate_proband <- function(null_probs, n_bases){
 record_snp <- function(mutated_position, proband_id, regions, region_break_points, seq_probabilities){
   
   # take a proband id and position and return one line of vcf
-  region_idx = sum(region_break_points < mutated_position) + 1
+  region_idx = sum(region_break_points < mutated_position)
   rel_pos = as.numeric(mutated_position - region_break_points[region_idx])
   coords = strsplit(names(seq_probabilities)[region_idx], "\\.")[[1]]
   chr = coords[1]
@@ -91,7 +91,7 @@ unsupervised_sim <- function(regions, seq_probabilities, n_probands, iteration){
   null_probs = as.numeric(unlist(seq_probabilities))*2 # note seq_probabilities should be generated with normalize = FALSE
   n_bases = length(null_probs)
   
-  region_break_points = cumsum(sapply(seq_probabilities, function(s) length(s)))
+  region_break_points = c(0, cumsum(sapply(seq_probabilities, function(s) length(s))))
 
   mutation_coords = replicate(n_probands, simulate_proband(null_probs, n_bases))
   muts_per_proband = sapply(mutation_coords, function(m) length(m))
