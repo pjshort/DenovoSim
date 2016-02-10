@@ -30,7 +30,10 @@ Set of regions in which simulations should be mutated. Required columns are chr,
 Full run with a job array would look like this:
 
 ```bash
-bsub -J "coding_sim[1-1000:2]" -R'select[mem>3000] rusage[mem=3000]' -M3000 /software/R-3.2.2/bin/Rscript /nfs/users/nfs_p/ps14/software/DenovoSim/scripts/DenovoSim.R--verbose --n_probands=4294 --iterations=10 --iteration_start=\$LSB_JOBINDEX --n_chunks=1  --base_name=~/experiments/simulated_data/coding_sim --regions=~/reference_data/gencode_exons.txt
+bsub -J "coding_sim[1-1000:2]" -R'select[mem>3000] rusage[mem=3000]' -M3000 \
+/software/R-3.2.2/bin/Rscript /nfs/users/nfs_p/ps14/software/DenovoSim/scripts/DenovoSim.R \
+--verbose --n_probands=4294 --iterations=10 --iteration_start=\$LSB_JOBINDEX --n_chunks=1 \
+--base_name=~/experiments/simulated_data/coding_sim --regions=~/reference_data/gencode_exons.txt
 ```
 
 Note that 'by' digit in the job array should match --iterations. E.g. if you run coding_sim[1-1000:5] then --iterations=5. This would generate files coding_sim.1.txt, coding_sim.6.txt, coding_sim.11.txt, ...
