@@ -68,7 +68,7 @@ if (args$n_snps != 0){
   #save(seq_probabilities, file = "../data/sequence_probabilities.out")
   #attach("../data/sequence_probabilities.out")
   
-  sim_out = lapply(seq(1, args$iterations), function(i) simulate_de_novos(regions, seq_probabilities_normalized, args$n_snps, args$n_probands, i))
+  sim_out = lapply(seq(args$iteration_start, args$iteration_start + args$iterations), function(i) simulate_de_novos(regions, seq_probabilities_normalized, args$n_snps, args$n_probands, i))
   sim_df = do.call(rbind, sim_out)
   sim_df = sim_df[,c("person_stable_id", "chr", "pos", "ref", "alt", "iteration")]
 } else { 
@@ -80,7 +80,7 @@ if (args$n_snps != 0){
   #save(seq_probabilities, file = "../data/sequence_probabilities.out")
   #attach("../data/sequence_probabilities.out")
   
-  sim_out = lapply(seq(1, args$iterations), function(i) unsupervised_sim(regions, seq_probabilities_absolute, args$n_probands, i))
+  sim_out = lapply(seq(args$iteration_start, args$iteration_start + args$iterations), function(i) unsupervised_sim(regions, seq_probabilities_absolute, args$n_probands, i))
   sim_df = do.call(rbind, sim_out)
 }
 
