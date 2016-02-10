@@ -2,13 +2,7 @@
 Simulate de novo mutations using model based on trinucleotide mutation rate model introduced in Samocha et. al, 2014. Users can condition on number of patients in a study, and number of mutations observed. Updates to the model planned and tracked in issues section.
 
 # Running the simulations
-DenovoSim takes the following command line arguments:
-# running unsupervised simulation from ~/software/DenovoSim/scripts
-cd /software/DenovoSim/scripts
-
-bsub -J "coding_sim[1-1000:2]" -R'select[mem>3000] rusage[mem=3000]' -M3000
-
-/software/R-3.2.2/bin/Rscript /nfs/users/nfs_p/ps14/software/DenovoSim/scripts/DenovoSim.R 
+DenovoSim.R takes the following command line arguments and relies on a job array to generate multiple files:
 
 --verbose
 
@@ -30,7 +24,7 @@ This will save as coding_sim.n.txt where n is the iteration number
 --regions=~/reference_data/gencode_exons.txt
 Set of regions in which simulations should be mutated. Required columns are chr, start, stop.
 
-Full run would look like this:
+Full run with a job array would look like this:
 bsub -J "coding_sim[1-1000:2]" -R'select[mem>3000] rusage[mem=3000]' -M3000 /software/R-3.2.2/bin/Rscript /nfs/users/nfs_p/ps14/software/DenovoSim/scripts/DenovoSim.R--verbose --n_probands=4294 --iterations=10 --iteration_start=\$LSB_JOBINDEX --n_chunks=1  --base_name=~/experiments/simulated_data/coding_sim --regions=~/reference_data/gencode_exons.txt
 
 Note that 'by' digit in the job array should match --iterations. E.g. if you run coding_sim[1-1000:5] then --iterations=5. This would generate files coding_sim.1.txt, coding_sim.6.txt, coding_sim.11.txt, ...
